@@ -67,8 +67,8 @@ function tile2lat(y, z) {
  * var tile = pointToTile(1, 1, 20)
  * //=tile
  */
-function pointToTile(lon, lat, z) {
-    var tile = pointToTileFraction(lon, lat, z);
+function pointToTile(lon, lat, z, srsType) {
+    var tile = pointToTileFraction(lon, lat, z, srsType);
     tile[0] = Math.floor(tile[0]);
     tile[1] = Math.floor(tile[1]);
     return tile;
@@ -268,15 +268,22 @@ function getBboxZoom(bbox) {
  * var tile = pointToTileFraction(30.5, 50.5, 15)
  * //=tile
  */
-function pointToTileFraction(lon, lat, z) {
-    var sin = Math.sin(lat * d2r),
-        z2 = Math.pow(2, z),
-        x = z2 * (lon / 360 + 0.5),
-        y = z2 * (0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI);
+function pointToTileFraction(lon, lat, z, srsType) {
+    if (srsType == undefined) {
+        var z2 = 360 / Math.pow(2, z);
+        var x = (lon + 180) / z2;
+        var y = (90 - lat) / z2;
+    }
+    else {
+        var sin = Math.sin(lat * d2r),
+            z2 = Math.pow(2, z),
+            x = z2 * (lon / 360 + 0.5),
+            y = z2 * (0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI);
 
-    // Wrap Tile X
-    x = x % z2
-    if (x < 0) x = x + z2
+        // Wrap Tile X
+        x = x % z2
+        if (x < 0) x = x + z2
+    }
     return [x, y, z];
 }
 
